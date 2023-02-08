@@ -1,13 +1,11 @@
 #include "get_next_line.h"
+/* 
+con buffersize 3
+	hace un primer malloc para guardar str = "app", cuando vuelvo a llamar al
+	malloc para introducir app + lee\n a str se pierde la direccion de memoria de str que apunta a app y por lo tanto tenemos un leak de memoria
 
-/* 	if (fd < 0 || BUFFER_SIZE <= 0)
-		return (NULL); */
-/*
-int free_memory()
-{
-
-}
-*/
+	solución(?): en el momento en el que str haya sido devuelto hacer un free a la funcion.
+ */
 int	get_line(char *buf)
 {
 	int i;
@@ -27,64 +25,48 @@ int	get_line(char *buf)
 
 char	*get_next_line(int fd)
 {
-	int		buff_size;
 	char	*str;
 	int		number;
 	int		check;
 	static char	*tmp;
 	int i;
-
+	
 	str = 0;
-	buff_size = 9999;
 	number = 0;
 	check = 1;
 	i = 0;
-	char buf[buff_size + 1];
-	/*
-	si los tiene tengo que limpiar la linea ya copiada (pearmelon\0) y quedarme con las siguientes (watermelon\n)
-	en caso de que no haya más lineas nuevas, hacer free.
-	 */
-	printf("esto es tmp en el inicio:%s\n", tmp);
+	char buf[BUFFER_SIZE + 1];
+	if (fd < 0 || BUFFER_SIZE <= 0)
+		return (NULL);
 	if (tmp != 0)
 	{
-		//printf("esto es tmp al entrar al if:%s\n", tmp);
-		//printf("esto es str al entrar al if:%s\n", str);
-		str = ft_strjoin(str, tmp); //pearmelon\nwatermelon\0
-		check = get_line(str);		//pearmelon\0watermelon\0
-		check = get_line(tmp);		//pearmelon\0watermelon\0
+		str = ft_strjoin(str, tmp);
+		check = get_line(str);
+		check = get_line(tmp);
 		if (check == 2)
-			tmp = ft_strchr(tmp, '\0'); // watermelon\0
-		/*if ()
-		{
-			free(tmp);
-			tmp = 0;
-		} */
-		//printf("esto es tmp despues:%s\n", tmp);
+			tmp = ft_strchr(tmp, '\0');
 		if (check == 2)
 			return (str);
 	}
-	while (read(fd, buf, buff_size) != 0)
+	while ((i = read(fd, buf, BUFFER_SIZE)) != 0)
 	{
+		//if (tmp)
+			free(tmp);
 		tmp = 0;
-		printf("entras?:%s\n", tmp);
-		buf[buff_size] = '\0';		// apple__\0					// \npear\0					// \nwate\0
-		//printf("imprimiendo buf:%s\n", buf);
-		number = get_line(buf);		// apple\0  number = 1		// \0pear\0 number = 2		// \0wate\0	number = 2
-		printf("cual es number%i\n", number);
+		buf[i] = '\0';
+		number = get_line(buf);
+		i = 0;
 		if (number == 2)
 		{
-			printf("estas aqui?\n");
 			while(buf[i] != '\0')
 				i++;
 			if (buf[i] == '\0')
 				i++;
 			tmp = ft_strjoin(tmp, &buf[i]);
 		}
-		printf("esto es tmp en el bucle:%s\n", tmp);
-		str = ft_strjoin(str, buf);// apple\0					// apple\0					// \0
-		//printf("esto es tmp en el bucle al terminar :%s\n", tmp);
+		str = ft_strjoin(str, buf);
 		if (number == 2)
-				return (str);									//apple\0 primera línea		// \0
+				return (str);
 	}
 	return (str);
 }
@@ -97,12 +79,15 @@ int	main(void)
 	fd = open("filename.txt", O_RDONLY);
 	str = get_next_line(fd);
 	printf("esto es el main:%s\n", str);
-	str = get_next_line(fd);
-	printf("esto es el main:%s\n", str);
-	str = get_next_line(fd);
-	printf("esto es el main:%s\n", str);
-	close(fd);
 	free(str);
+	str = get_next_line(fd);
+	printf("esto es el main:%s\n", str);
+	free(str);
+ 	str = get_next_line(fd);
+	printf("esto es el main:%s\n", str);
+	free(str);
+	close(fd);
+	system("leaks a.out");
 	return (0);
 }
 

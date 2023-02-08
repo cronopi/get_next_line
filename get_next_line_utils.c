@@ -66,6 +66,9 @@ char	*ft_strjoin(char const *s1, char const *s2)
 	if (str == 0)
 		return (NULL);
 	fill_string(str, str_s1, str_s2);
+
+	if(str_s1 != 0)
+		free(str_s1);
 	return (str);
 }
 
