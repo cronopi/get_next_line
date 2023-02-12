@@ -29,18 +29,31 @@ char	*get_next_line(int fd)
 	number = 0;
 	check = 1;
 	i = 0;
-	char buf[BUFFER_SIZE + 1];
+	char buf[BUFFER_SIZE + 1];//preguntar si buffer tiene que ser dinámico o estático
 	if (fd < 0 || BUFFER_SIZE <= 0)
 		return (NULL);
+	/*
+	necesito copiar todo el contenido de aux en temp pero yo no se cual
+	será el tamaño de temp
+	*/
 	if (aux != 0)
 	{
 		str = ft_strjoin(str, aux);
 		check = get_line(str);
 		check = get_line(aux);
 		if (check == 2)
-			aux = ft_strchr(aux, '\0');
-		if (check == 2)
 		{
+			//char *temp;
+			char *temp= &aux;
+			free(aux);
+			aux = 0;
+			aux = ft_strchr(temp, '\0');
+			if(aux != 0 && aux[0] == '\0')
+			{
+				free(aux);
+				aux = 0;
+			}
+			str = ft_strjoin(str, "\n");
 			return (str);
 		}
 	}
@@ -48,7 +61,7 @@ char	*get_next_line(int fd)
 	{
 		if (i == -1)
 			return (NULL);
-		if (aux)
+		if (aux != 0)
 			free(aux);
 		aux = 0;
 		buf[i] = '\0';
@@ -66,37 +79,28 @@ char	*get_next_line(int fd)
 		if(number == 2)
 		{
 			str = ft_strjoin(str, "\n");
-/* 	if(aux && !aux[0]) entender por qué
-	{
-		free(aux);
-		aux = 0;
-	} */
+			if(aux != 0 && aux[0] == '\0')
+			{
+				free(aux);
+				aux = 0;
+			}
 			return (str);
 		}
 	}
-/* 	if(aux)
+	if(aux != 0)
 	{
 		free(aux);
 		aux = 0;
-	} */
+	}
 	return (str);
 }
 
-/* int	main(void)
+int	main(void)
 {
 	int		fd;
 	char	*str;
 
-	fd = open("multiple_line_with_nl", O_RDONLY);
-	str = get_next_line(fd);
-	printf("esto es el main:%s\n", str);
-	free(str);
-	str = get_next_line(fd);
-	printf("esto es el main:%s\n", str);
-	free(str);
-	str = get_next_line(fd);
-	printf("esto es el main:%s\n", str);
-	free(str);
+	fd = open("filename.txt", O_RDONLY);
 	str = get_next_line(fd);
 	printf("esto es el main:%s\n", str);
 	free(str);
@@ -115,11 +119,11 @@ char	*get_next_line(int fd)
 	close(fd);
 	//system("leaks a.out");
 	return (0);
-} */
+}
 
 /*
 
-open("filename.txt", O_RDONLY);
+open("multiple_nlx5", O_RDONLY);
 
 read(int fd, void *buf, size_t nbyte);
 el nbyte hace referencia al número de bytes(chars o posiciones) que va a avanzar/leer(copiar al buffer).
@@ -142,5 +146,5 @@ ______________________________________________________
 
 	si yo encuntro un \n
 
-
+	lo de abajo es similar a lo de arriba, eso peude ayuar da solucionarlo.
 */
