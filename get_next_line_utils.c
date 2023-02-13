@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   get_next_line_utils.c                              :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: rcastano <rcastano@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2023/02/13 14:02:30 by rcastano          #+#    #+#             */
+/*   Updated: 2023/02/13 14:02:30 by rcastano         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "get_next_line.h"
 
 size_t	ft_strlen(const char *str)
@@ -66,9 +78,7 @@ char	*ft_strjoin(char const *s1, char const *s2)
 	if (str == 0)
 		return (NULL);
 	fill_string(str, str_s1, str_s2);
-
-	if(str_s1 != 0)
+	if (str_s1 != 0)
 		free(str_s1);
 	return (str);
 }
-
