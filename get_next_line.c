@@ -6,21 +6,17 @@
 /*   By: rcastano <rcastano@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/13 13:54:31 by rcastano          #+#    #+#             */
-/*   Updated: 2023/02/13 15:21:56 by rcastano         ###   ########.fr       */
+/*   Updated: 2023/02/14 13:42:07 by rcastano         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-	/*
-	necesito copiar todo el contenido de aux en temp pero yo no se cual
-	será el tamaño de temp y hacer lo mismo con str en el while antes y despues
-	de check = 2
-	*/
 #include "get_next_line.h"
 
-void	clean_up(char *clean)
+char	*clean_up(char *clean)
 {
 	free(clean);
 	clean = 0;
+	return (clean);
 }
 
 static char	*get_line(char *buf)
@@ -44,26 +40,32 @@ char	*get_next_line(int fd)
 	static char	*aux;
 	int			i;
 	char		buf[BUFFER_SIZE + 1];
-	//char		tmp[999];
 
 	str = 0;
 	i = 0;
 	if (fd < 0 || BUFFER_SIZE <= 0)
 		return (NULL);
+	//en la segunda entrada auxiliar tiene contenido por lo que está entrando en el if
 	if (aux != 0)
 	{
-		//printf("esto es aux:%s\n", aux);
 		str = ft_strjoin(str, aux);
 		check = get_line(aux);
+			//printf("testcheck: %s\n", check);
+			//printf("testaux: %s\n", aux);
 		if (check != NULL)
 		{
-			/*aux = malloc(1);
-			aux[0] = '\0'; */
+			aux = 0;
 			aux = ft_strjoin(aux, check);
 			if (aux != 0 && aux[0] == '\0')
 				clean_up(aux);
 			return (str);
 		}
+/* 		if (aux != 0)
+			clean_up(aux);
+		return (str); */
+		aux = 0;
+		return (str);
+		//con esto no me salta el error pero siempre me imprime la ultima llamada que le hago
 	}
 	while ((i = read(fd, buf, BUFFER_SIZE)) != 0)
 	{
@@ -71,18 +73,20 @@ char	*get_next_line(int fd)
 			return (NULL);
 		if (aux != 0)
 			free(aux);
-		aux = 0; // no le veo sentido
+		aux = 0;
 		buf[i] = '\0';
-		check = get_line(buf);
+		//printf("que contiene buffer:%s\n", buf);
+		check = get_line(buf); //que sentido tiene igualarlo a check, por qué no directamente a aux
 		//i = 0;
 		if (check != NULL && BUFFER_SIZE != 1)
 			aux = ft_substr(check, 0, i - (check - buf));
-			//aux = ft_substr(buf, check - buf, i);
 		str = ft_strjoin(str, buf);
 		if (check != NULL)
 		{
 			if (aux != 0 && aux[0] == '\0')
-				clean_up(aux);
+			{
+				aux = clean_up(aux);
+			}
 			return (str);
 		}
 	}
@@ -91,12 +95,12 @@ char	*get_next_line(int fd)
 	return (str);
 }
 
-int	main(void)
+/* int	main(void)
 {
 	int		fd;
 	char	*str;
 
-	fd = open("filename.txt", O_RDONLY);
+	fd = open("42_with_nl", O_RDONLY);
 	str = get_next_line(fd);
 	printf("esto es el main:%s\n", str);
 	free(str);
@@ -118,7 +122,7 @@ int	main(void)
 	close(fd);
 	//system("leaks a.out");
 	return (0);
-}
+} */
 
 /*
 open("multiple_nlx5", O_RDONLY);
@@ -134,4 +138,5 @@ con fd estamos crando una forma de identificar/describir el archivo
 Al hacer open he creado un puntero a la primera posicion
 (de la letra del archivo)/del archivo.
 
+//aux = ft_substr(buf, check - buf, i);
 */
