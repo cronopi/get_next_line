@@ -3,20 +3,19 @@
 /*                                                        :::      ::::::::   */
 /*   get_next_line.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rcastano <rcastano@student.42.fr>          +#+  +:+       +#+        */
+/*   By: nazurmen <nazurmen@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/13 13:54:31 by rcastano          #+#    #+#             */
-/*   Updated: 2023/02/14 13:42:07 by rcastano         ###   ########.fr       */
+/*   Updated: 2023/02/16 22:41:38 by nazurmen         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 
-char	*clean_up(char *clean)
+void	clean_up(char **clean)
 {
-	free(clean);
-	clean = 0;
-	return (clean);
+	free(*clean);
+	*clean = 0;
 }
 
 static char	*get_line(char *buf)
@@ -39,90 +38,105 @@ char	*get_next_line(int fd)
 	char		*check;
 	static char	*aux;
 	int			i;
-	char		buf[BUFFER_SIZE + 1];
+	char		*buf;
+	char		*free_aux;
+	//char		buf[BUFFER_SIZE + 1];
 
 	str = 0;
-	i = 0;
+	i = 1;
 	if (fd < 0 || BUFFER_SIZE <= 0)
 		return (NULL);
-	//en la segunda entrada auxiliar tiene contenido por lo que está entrando en el if
+	buf = malloc(BUFFER_SIZE + 1);
+	if (!buf)
+		return (NULL);
 	if (aux != 0)
 	{
 		str = ft_strjoin(str, aux);
 		check = get_line(aux);
-			//printf("testcheck: %s\n", check);
-			//printf("testaux: %s\n", aux);
 		if (check != NULL)
 		{
+			free_aux = aux;
 			aux = 0;
-			aux = ft_strjoin(aux, check);
+				aux = ft_strdup(check);
+			clean_up(&free_aux);
 			if (aux != 0 && aux[0] == '\0')
-				clean_up(aux);
+				clean_up(&aux);
+			free(buf);
 			return (str);
 		}
-/* 		if (aux != 0)
-			clean_up(aux);
-		return (str); */
-		aux = 0;
-		return (str);
-		//con esto no me salta el error pero siempre me imprime la ultima llamada que le hago
 	}
-	while ((i = read(fd, buf, BUFFER_SIZE)) != 0)
+	i = read(fd, buf, BUFFER_SIZE);
+	while (i != 0)
 	{
-		if (i == -1)
-			return (NULL);
 		if (aux != 0)
-			free(aux);
-		aux = 0;
+			clean_up(&aux);
+ 		if (i == -1)
+		{
+			if (str != 0)
+				free(str);
+			free(buf);
+			return (NULL);
+		}
 		buf[i] = '\0';
-		//printf("que contiene buffer:%s\n", buf);
-		check = get_line(buf); //que sentido tiene igualarlo a check, por qué no directamente a aux
-		//i = 0;
+		check = get_line(buf);
 		if (check != NULL && BUFFER_SIZE != 1)
 			aux = ft_substr(check, 0, i - (check - buf));
 		str = ft_strjoin(str, buf);
 		if (check != NULL)
 		{
 			if (aux != 0 && aux[0] == '\0')
-			{
-				aux = clean_up(aux);
-			}
+				clean_up(&aux);
+			free(buf);
 			return (str);
 		}
+		i = read(fd, buf, BUFFER_SIZE);
 	}
 	if (aux != 0)
-		clean_up(aux);
+		clean_up(&aux);
+	free(buf);
 	return (str);
 }
 
-/* int	main(void)
-{
-	int		fd;
-	char	*str;
-
-	fd = open("42_with_nl", O_RDONLY);
-	str = get_next_line(fd);
-	printf("esto es el main:%s\n", str);
-	free(str);
- 	str = get_next_line(fd);
-	printf("esto es el main:%s\n", str);
-	free(str);
-	str = get_next_line(fd);
-	printf("esto es el main:%s\n", str);
-	free(str);
-	str = get_next_line(fd);
-	printf("esto es el main:%s\n", str);
-	free(str);
- 	str = get_next_line(fd);
-	printf("esto es el main:%s\n", str);
-	free(str);
-	str = get_next_line(fd);
-	printf("esto es el main:%s\n", str);
-	free(str);
-	close(fd);
-	//system("leaks a.out");
-	return (0);
-} */
+//int	main(void)
+//{
+//	int		fd;
+//	int		fd2;
+//	char	*str;
+//
+//	fd = open("read_error.txt", O_RDONLY);
+////	fd2 = open("filename.txt", O_RDONLY);
+//	str = get_next_line(fd);
+//	printf("esto es el main:%s\n", str);
+//	free(str);
+// 	str = get_next_line(fd);
+//	printf("esto es el main:%s\n", str);
+//	free(str);
+//	str = get_next_line(fd);
+//	printf("esto es el main:%s\n", str);
+//	free(str);
+//	close(fd);
+//	//fd = open("read_error.txt", O_RDONLY);
+//	//str = get_next_line(fd);
+//	//printf("esto es el main:%s\n", str);
+//	//free(str);
+//	//str = get_next_line(fd);
+//	//printf("esto es el main:%s\n", str);
+//	//free(str);
+//	//str = get_next_line(fd);
+//	//printf("esto es el main:%s\n", str);
+//	//free(str);
+//	//str = get_next_line(fd);
+//	//printf("esto es el main:%s\n", str);
+//	//free(str);
+//	//str = get_next_line(fd);
+//	//printf("esto es el main:%s\n", str);
+//	//free(str);
+//	//close(fd);
+////	close(fd2);
+//	//system("leaks a.out");
+//
+//	return (0);
+//}
 
 /*
 open("multiple_nlx5", O_RDONLY);

@@ -22,20 +22,26 @@ size_t	ft_strlen(const char *str)
 	return (i);
 }
 
-char	*ft_strchr(const char *str, int c)
+char	*ft_strdup(const char *s)
 {
+	char	*d;
 	int		i;
-	char	*ptr;
-	char	cast_c;
+	int		j;
 
-	ptr = (char *)str;
+	j = 0;
+	while (s[j])
+		j++;
+	d = malloc(sizeof(const char) * (j + 1));
+	if (d == 0)
+		return (NULL);
 	i = 0;
-	cast_c = (char) c;
-	while (ptr[i] != '\0')
+	while (s[i] != '\0')
+	{
+		d[i] = s[i];
 		i++;
-	if (cast_c == '\0')
-		return (&ptr[i] + 1);
-	return (0);
+	}
+	d[i] = '\0';
+	return (d);
 }
 
 void	fill_string(char *str, char *s1, char *s2)
@@ -50,18 +56,16 @@ void	fill_string(char *str, char *s1, char *s2)
 		str[i] = s1[i];
 		i++;
 		if (s1[i - 1] == '\n')
-			break;
+			break ;
 	}
-	//printf("fill string: %s\n", str);
 	while (s2[j] != '\0')
 	{
 		str[i] = s2[j];
 		i++;
 		j++;
 		if (s2[j - 1] == '\n')
-			break;
+			break ;
 	}
-		//printf("haz cosas: %s\n", str);
 	str[i] = '\0';
 }
 
@@ -77,7 +81,6 @@ char	*ft_strjoin(char const *s1, char const *s2)
 	str_s2 = (char *)s2;
 	i = 0;
 	j = 0;
-
 	if (s1)
 		i = ft_strlen(s1);
 	j = ft_strlen(s2);
@@ -85,7 +88,7 @@ char	*ft_strjoin(char const *s1, char const *s2)
 	if (str == 0)
 		return (NULL);
 	fill_string(str, str_s1, str_s2);
-	if(str_s1 != 0)
+	if (str_s1 != 0)
 		free(str_s1);
 	return (str);
 }
