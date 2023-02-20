@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   get_next_line.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rcastano <rcastano@student.42.fr>          +#+  +:+       +#+        */
+/*   By: nazurmen <nazurmen@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/13 13:54:31 by rcastano          #+#    #+#             */
-/*   Updated: 2023/02/20 13:22:59 by rcastano         ###   ########.fr       */
+/*   Updated: 2023/02/20 17: by nazurmen         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,8 +14,11 @@
 
 void	clean_up(char **clean)
 {
-	free(*clean);
-	*clean = 0;
+	if (*clean)
+	{
+		free(*clean);
+		*clean = 0;
+	}
 }
 
 static char	*get_line(char *buf)
@@ -32,39 +35,61 @@ static char	*get_line(char *buf)
 	return (NULL);
 }
 
-char	*aux_funtion(char *aux, char *str, char *buf)
+int	aux_funtion(char **aux, char **str, char *buf)
+{
+	char	*check;
+	char	*free_aux;
+
+	*str = ft_strjoin(*str, *aux);
+	check = get_line(*aux);
+	if (check != NULL)
+	{
+		free_aux = *aux;
+		*aux = 0;
+		*aux = ft_strdup(check);
+		clean_up(&free_aux);
+		if ((*aux) != 0 && (*aux)[0] == '\0')
+			clean_up(aux);
+		free(buf);
+		return (1);
+	}
+	return (0);
+}
+
+int	bucle(char **buf, char **aux, char **str, int i)
 {
 	char	*check;
 
-	str = ft_strjoin(str, aux);
-	check = get_line(aux); //el valor de aux no ha cambiado pero ha sido liberado
+	if (*aux != 0)
+		clean_up(aux);
+	if (i == -1)
+	{
+		if (*str != 0)
+			free(*str);
+		free(*buf);
+		return (1);
+	}
+	(*buf)[i] = '\0';
+	check = get_line(*buf);
+	if (check != NULL && BUFFER_SIZE != 1)
+		*aux = ft_substr(check, 0, i - (check - *buf));
+	*str = ft_strjoin(*str, *buf);
 	if (check != NULL)
 	{
-		free_aux = aux;
-		aux = 0;
-		aux = ft_strdup(check);
-		clean_up(&free_aux);
-		if (aux != 0 && aux[0] == '\0')
-			clean_up(&aux);
-		free(buf);
-		return (str);
+		if ((*aux) != 0 && (*aux)[0] == '\0')
+			clean_up(aux);
+		free(*buf);
+		return (2);
 	}
+	return (0);
 }
-
-/* char *bucle()
-{
-
-	return ();
-} */
 
 char	*get_next_line(int fd)
 {
 	char		*str;
-	char		*check;
 	static char	*aux;
 	int			i;
 	char		*buf;
-	//char		*free_aux;
 
 	str = 0;
 	if (fd < 0 || BUFFER_SIZE <= 0)
@@ -72,58 +97,23 @@ char	*get_next_line(int fd)
 	buf = malloc(BUFFER_SIZE + 1);
 	if (!buf)
 		return (NULL);
-
-	if (aux != 0)
-	{
-		str = ft_strjoin(str, aux);
-		check = get_line(aux); //el valor de aux no ha cambiado pero ha sido liberado
-		printf("test check: %s \n", check);
-		if (check != NULL)
-		{
-			return (str = aux_funtion(aux, str, buf));
-			/*free_aux = aux;
-			aux = 0;
-			aux = ft_strdup(check);
-			clean_up(&free_aux);
-			if (aux != 0 && aux[0] == '\0')
-				clean_up(&aux);
-			free(buf);
-			return (str); */
-		}
-	}
+	if (aux != 0 && aux_funtion(&aux, &str, buf) == 1)
+		return (str);
 	i = read(fd, buf, BUFFER_SIZE);
 	while (i != 0)
 	{
-		if (aux != 0)
-			clean_up(&aux);
- 		if (i == -1)
-		{
-			if (str != 0)
-				free(str);
-			free(buf);
+		i = bucle(&buf, &aux, &str, i);
+		if (i == 1)
 			return (NULL);
-		}
-		buf[i] = '\0';
-		check = get_line(buf);
-		if (check != NULL && BUFFER_SIZE != 1)
-			aux = ft_substr(check, 0, i - (check - buf));
-		str = ft_strjoin(str, buf);
-		if (check != NULL)
-		{
-			if (aux != 0 && aux[0] == '\0')
-				clean_up(&aux);
-			free(buf);
+		else if (i == 2)
 			return (str);
-		}
 		i = read(fd, buf, BUFFER_SIZE);
 	}
-	if (aux != 0)
-		clean_up(&aux);
-	free(buf);
-	return (str);
+	clean_up(&aux);
+	return (free(buf), str);
 }
 
-int	main(void)
+/* int	main(void)
 {
 	int		fd;
 	//int		fd2;
@@ -140,8 +130,6 @@ int	main(void)
 	str = get_next_line(fd);
 	printf("esto es el main:%s\n", str);
 	free(str);
-	close(fd);
-	fd = open("read_error.txt", O_RDONLY);
 	str = get_next_line(fd);
 	printf("esto es el main:%s\n", str);
 	free(str);
@@ -159,10 +147,10 @@ int	main(void)
 	free(str);
 	close(fd);
 	//close(fd2);
-	system("leaks a.out");
+	//system("leaks a.out");
 
 	return (0);
-}
+} */
 
 /* 			free_aux = aux;
 			aux = 0;
@@ -189,4 +177,7 @@ Al hacer open he creado un puntero a la primera posicion
 
 //aux = ft_substr(buf, check - buf, i);
 
+
+if (!buf = malloc(BUFFER_SIZE + 1));
+		return (NULL);
 */
