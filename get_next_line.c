@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   get_next_line.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nazurmen <nazurmen@student.42.fr>          +#+  +:+       +#+        */
+/*   By: rcastano <rcastano@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/13 13:54:31 by rcastano          #+#    #+#             */
-/*   Updated: 2023/02/16 22:41:38 by nazurmen         ###   ########.fr       */
+/*   Updated: 2023/02/20 13:22:59 by rcastano         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,6 +32,31 @@ static char	*get_line(char *buf)
 	return (NULL);
 }
 
+char	*aux_funtion(char *aux, char *str, char *buf)
+{
+	char	*check;
+
+	str = ft_strjoin(str, aux);
+	check = get_line(aux); //el valor de aux no ha cambiado pero ha sido liberado
+	if (check != NULL)
+	{
+		free_aux = aux;
+		aux = 0;
+		aux = ft_strdup(check);
+		clean_up(&free_aux);
+		if (aux != 0 && aux[0] == '\0')
+			clean_up(&aux);
+		free(buf);
+		return (str);
+	}
+}
+
+/* char *bucle()
+{
+
+	return ();
+} */
+
 char	*get_next_line(int fd)
 {
 	char		*str;
@@ -39,30 +64,31 @@ char	*get_next_line(int fd)
 	static char	*aux;
 	int			i;
 	char		*buf;
-	char		*free_aux;
-	//char		buf[BUFFER_SIZE + 1];
+	//char		*free_aux;
 
 	str = 0;
-	i = 1;
 	if (fd < 0 || BUFFER_SIZE <= 0)
 		return (NULL);
 	buf = malloc(BUFFER_SIZE + 1);
 	if (!buf)
 		return (NULL);
+
 	if (aux != 0)
 	{
 		str = ft_strjoin(str, aux);
-		check = get_line(aux);
+		check = get_line(aux); //el valor de aux no ha cambiado pero ha sido liberado
+		printf("test check: %s \n", check);
 		if (check != NULL)
 		{
-			free_aux = aux;
+			return (str = aux_funtion(aux, str, buf));
+			/*free_aux = aux;
 			aux = 0;
-				aux = ft_strdup(check);
+			aux = ft_strdup(check);
 			clean_up(&free_aux);
 			if (aux != 0 && aux[0] == '\0')
 				clean_up(&aux);
 			free(buf);
-			return (str);
+			return (str); */
 		}
 	}
 	i = read(fd, buf, BUFFER_SIZE);
@@ -97,46 +123,55 @@ char	*get_next_line(int fd)
 	return (str);
 }
 
-//int	main(void)
-//{
-//	int		fd;
-//	int		fd2;
-//	char	*str;
-//
-//	fd = open("read_error.txt", O_RDONLY);
-////	fd2 = open("filename.txt", O_RDONLY);
-//	str = get_next_line(fd);
-//	printf("esto es el main:%s\n", str);
-//	free(str);
-// 	str = get_next_line(fd);
-//	printf("esto es el main:%s\n", str);
-//	free(str);
-//	str = get_next_line(fd);
-//	printf("esto es el main:%s\n", str);
-//	free(str);
-//	close(fd);
-//	//fd = open("read_error.txt", O_RDONLY);
-//	//str = get_next_line(fd);
-//	//printf("esto es el main:%s\n", str);
-//	//free(str);
-//	//str = get_next_line(fd);
-//	//printf("esto es el main:%s\n", str);
-//	//free(str);
-//	//str = get_next_line(fd);
-//	//printf("esto es el main:%s\n", str);
-//	//free(str);
-//	//str = get_next_line(fd);
-//	//printf("esto es el main:%s\n", str);
-//	//free(str);
-//	//str = get_next_line(fd);
-//	//printf("esto es el main:%s\n", str);
-//	//free(str);
-//	//close(fd);
-////	close(fd2);
-//	//system("leaks a.out");
-//
-//	return (0);
-//}
+int	main(void)
+{
+	int		fd;
+	//int		fd2;
+	char	*str;
+
+	fd = open("multiple_nlx5", O_RDONLY);
+	//fd2 = open("filename.txt", O_RDONLY);
+	str = get_next_line(fd);
+	printf("esto es el main:%s\n", str);
+	free(str);
+ 	str = get_next_line(fd);
+	printf("esto es el main:%s\n", str);
+	free(str);
+	str = get_next_line(fd);
+	printf("esto es el main:%s\n", str);
+	free(str);
+	close(fd);
+	fd = open("read_error.txt", O_RDONLY);
+	str = get_next_line(fd);
+	printf("esto es el main:%s\n", str);
+	free(str);
+	str = get_next_line(fd);
+	printf("esto es el main:%s\n", str);
+	free(str);
+	str = get_next_line(fd);
+	printf("esto es el main:%s\n", str);
+	free(str);
+	str = get_next_line(fd);
+	printf("esto es el main:%s\n", str);
+	free(str);
+	str = get_next_line(fd);
+	printf("esto es el main:%s\n", str);
+	free(str);
+	close(fd);
+	//close(fd2);
+	system("leaks a.out");
+
+	return (0);
+}
+
+/* 			free_aux = aux;
+			aux = 0;
+				aux = ft_strdup(check);
+			clean_up(&free_aux);
+			if (aux != 0 && aux[0] == '\0')
+				clean_up(&aux);
+			free(buf);
+			return (str); */
 
 /*
 open("multiple_nlx5", O_RDONLY);
@@ -153,4 +188,5 @@ Al hacer open he creado un puntero a la primera posicion
 (de la letra del archivo)/del archivo.
 
 //aux = ft_substr(buf, check - buf, i);
+
 */
